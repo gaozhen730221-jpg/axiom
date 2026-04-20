@@ -1,50 +1,44 @@
 import streamlit as st
 import yfinance as yf
-import pandas as pd
 import plotly.express as px
 
-# 1. 頁面設定
-st.set_page_config(page_title="Axiom 1.0", page_icon="📈")
+# 1. 頁面極簡設定
+st.set_page_config(page_title="Axiom 1.0")
+st.markdown("<h2 style='text-align: center;'>📈 Axiom 1.0 數據查詢</h2>", unsafe_allow_html=True)
 
-# 2. 標題與品牌
-st.markdown("<h1 style='text-align: center;'>🔒 Axiom 1.0</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: gray;'>數據公理化投資系統</p>", unsafe_allow_html=True)
-
-st.divider()
-
-# 3. 收錢與加 LINE 區塊
-st.subheader("💰 系統鎖定中：解鎖費用 NT$ 100")
-st.warning("請完成以下步驟領取『今日口令』：")
-
-# 顯示你的 LINE ID 並加粗
-st.error("第一步：複製創辦人 LINE ID")
-st.code("0966154137", language=None)
-
-st.info("第二步：打開 LINE 搜尋 ID 並加好友")
-st.write("📢 私訊告知：『我要領取 Axiom 1.0 口令』並傳送支付截圖。")
-
-# 備用按鈕（保留給部分能跳轉的手機）
-st.link_button("直接加 LINE (若沒反應請用 ID 搜尋)", "https://line.me/ti/p/~0966154137")
+# 2. 核心查詢框（讓客人先動手試用）
+st.write("### 🔍 第一步：輸入股票代號")
+stock_id = st.text_input("在此輸入台股代碼 (如: 2330)", value="")
 
 st.divider()
 
-# 4. 口令輸入
-pwd = st.text_input("🔑 請輸入 4 位數解鎖口令", type="password")
+# 3. 解鎖區（誘惑與收錢）
+st.write("### 🔒 第二步：解鎖專業圖表")
+if stock_id:
+    st.info(f"📊 股票 {stock_id} 的數據已連線，請輸入口令查看趨勢圖。")
+else:
+    st.write("請先在上方輸入代號。")
 
-if st.button("確認解鎖"):
-    if pwd == "8888":
-        st.balloons()
-        st.success("✅ 解鎖成功！歡迎使用 Axiom 1.0")
-        ticker = st.text_input("輸入台股代碼 (例如 2330)", "2330")
-        if ticker:
-            try:
-                data = yf.Ticker(f"{ticker}.TW").history(period="1mo")
-                if not data.empty:
-                    fig = px.line(data, y='Close', title=f"{ticker} 近一個月走勢")
-                    st.plotly_chart(fig, use_container_width=True)
-                else:
-                    st.error("找不到數據。")
-            except:
-                st.error("系統繁忙。")
-    elif pwd != "":
-        st.error("❌ 口令錯誤，請聯繫創辦人。")
+pwd = st.text_input("🔑 輸入 4 位數口令 (領取請加 LINE: 0966154137)", type="password")
+
+# 4. 判斷邏輯
+if pwd == "8888":
+    if stock_id:
+        try:
+            # 抓取台股數據
+            df = yf.Ticker(f"{stock_id}.TW").history(period="1mo")
+            if not df.empty:
+                st.success(f"✅ {stock_id} 數據解鎖成功！")
+                # 畫出漂亮的趨勢線
+                fig = px.line(df, y='Close', title=f"{stock_id} 近一個月走勢分析")
+                st.plotly_chart(fig, use_container_width=True)
+                # 顯示最新價格
+                st.metric(label="最新成交價", value=f"{df['Close'].iloc[-1]:.2f} TWD")
+            else:
+                st.error("查無此代號，請確認數字是否正確。")
+        except:
+            st.error("數據連線異常，請稍後再試。")
+    else:
+        st.warning("請先輸入股票代號。")
+elif pwd != "":
+    st.error("❌ 口令錯誤，請聯繫創辦人領取。")1

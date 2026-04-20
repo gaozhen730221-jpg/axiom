@@ -1,44 +1,56 @@
 import streamlit as st
 import yfinance as yf
-import plotly.express as px
 
-# 1. 頁面極簡設定
-st.set_page_config(page_title="Axiom 1.0")
-st.markdown("<h2 style='text-align: center;'>📈 Axiom 1.0 數據查詢</h2>", unsafe_allow_html=True)
-
-# 2. 核心查詢框（讓客人先動手試用）
-st.write("### 🔍 第一步：輸入股票代號")
-stock_id = st.text_input("在此輸入台股代碼 (如: 2330)", value="")
+# 1. 專業品牌配置 (顧形象)
+st.set_page_config(page_title="Axiom 1.0", page_icon="🚥")
+st.markdown("<h2 style='text-align: center;'>🛡️ Axiom 1.0 紅綠燈數據系統</h2>", unsafe_allow_html=True)
 
 st.divider()
 
-# 3. 解鎖區（誘惑與收錢）
-st.write("### 🔒 第二步：解鎖專業圖表")
-if stock_id:
-    st.info(f"📊 股票 {stock_id} 的數據已連線，請輸入口令查看趨勢圖。")
-else:
-    st.write("請先在上方輸入代號。")
+# 2. 查詢與門牌 (顧前：給甜頭 + 留聯絡)
+col1, col2 = st.columns([2, 1])
+with col1:
+    st.write("### 🔍 1. 查詢代號")
+    stock_id = st.text_input("輸入台股 4 位數代碼", value="2330")
+with col2:
+    st.write("### 📱 2. 創辦人")
+    st.success("ID: 0966154137")
 
-pwd = st.text_input("🔑 輸入 4 位數口令 (領取請加 LINE: 0966154137)", type="password")
+# 自動跳轉按鈕，確保手機用戶能一鍵加 LINE
+st.link_button("👉 點我直接加 LINE 領取口令", f"https://line.me/ti/p/~0966154137")
 
-# 4. 判斷邏輯
+st.divider()
+
+# 3. 核心紅綠燈預警 (顧後：口令 8888 是唯一鑰匙)
+st.write("### 🚥 3. 系統訊號狀態")
+pwd = st.text_input("🔑 輸入 4 位數口令解鎖紅綠燈", type="password")
+
 if pwd == "8888":
-    if stock_id:
-        try:
-            # 抓取台股數據
-            df = yf.Ticker(f"{stock_id}.TW").history(period="1mo")
-            if not df.empty:
-                st.success(f"✅ {stock_id} 數據解鎖成功！")
-                # 畫出漂亮的趨勢線
-                fig = px.line(df, y='Close', title=f"{stock_id} 近一個月走勢分析")
-                st.plotly_chart(fig, use_container_width=True)
-                # 顯示最新價格
-                st.metric(label="最新成交價", value=f"{df['Close'].iloc[-1]:.2f} TWD")
+    st.balloons()
+    try:
+        # 抓取即時數據進行紅綠燈判定
+        df = yf.Ticker(f"{stock_id}.TW").history(period="2d")
+        if not df.empty and len(df) >= 2:
+            now_price = df['Close'].iloc[-1]
+            old_price = df['Close'].iloc[-2]
+            diff = now_price - old_price
+            
+            # --- 紅綠燈視覺判斷 (專業第一性原理) ---
+            if diff > 0:
+                st.markdown(f"<div style='background-color:#ff4b4b; color:white; padding:30px; text-align:center; border-radius:15px;'><h1>🔴 紅燈：多頭進場</h1><p>價格上漲 {diff:.2f}</p></div>", unsafe_allow_html=True)
+            elif diff < 0:
+                st.markdown(f"<div style='background-color:#00c853; color:white; padding:30px; text-align:center; border-radius:15px;'><h1>🟢 綠燈：空頭警示</h1><p>價格下跌 {abs(diff):.2f}</p></div>", unsafe_allow_html=True)
             else:
-                st.error("查無此代號，請確認數字是否正確。")
-        except:
-            st.error("數據連線異常，請稍後再試。")
-    else:
-        st.warning("請先輸入股票代號。")
-elif pwd != "":
-    st.error("❌ 口令錯誤，請聯繫創辦人領取。")
+                st.markdown(f"<div style='background-color:#ffd600; color:black; padding:30px; text-align:center; border-radius:15px;'><h1>🟡 黃燈：觀望盤整</h1><p>價格持平</p></div>", unsafe_allow_html=True)
+            
+            st.write(f"**{stock_id} 最新成交價：{now_price:.2f} TWD**")
+        else:
+            st.error("代碼查無數據。")
+    except:
+        st.error("系統連線繁忙。")
+else:
+    # 沒解鎖時的狀態
+    st.warning("💡 訊號已鎖定，請加 LINE 並支付 100 元領取今日口令。")
+    st.markdown("<div style='background-color:#333; height:150px; border-radius:15px; display:flex; align-items:center; justify-content:center; color:#555;'>訊號解鎖後顯示紅綠燈顏色</div>", unsafe_allow_html=True)
+    if pwd != "":
+        st.error("❌ 口令錯誤，請洽詢創辦人。")

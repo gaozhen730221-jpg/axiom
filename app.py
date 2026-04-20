@@ -1,56 +1,49 @@
 import streamlit as st
 import yfinance as yf
+import os
 
-# 1. 專業品牌配置
-st.set_page_config(page_title="Axiom 1.0 Pro", page_icon="🚥")
-st.markdown("<h2 style='text-align: center;'>🛡️ Axiom 1.0 數據公理</h2>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: gray;'>最直接的紅綠燈判定系統</p>", unsafe_allow_html=True)
+# 1. 極簡頁面設置
+st.set_page_config(page_title="Axiom", page_icon="🚥")
+st.markdown("<h2 style='text-align: center;'>🚥 Axiom 數據公理</h2>", unsafe_allow_html=True)
 
-st.divider()
-
-# 2. 核心操作區
+# 2. 核心成交區 (單頁完成)
 col1, col2 = st.columns([1, 1])
 
 with col1:
-    st.write("### 🔍 1. 輸入代號")
-    stock_id = st.text_input("輸入台股 4 位數代碼", value="", max_chars=4)
+    st.write("### 🔍 第一步：輸入代號")
+    stock_id = st.text_input("台股代碼 (如: 2330)", value="", max_chars=4)
+    pwd = st.text_input("🔓 輸入解鎖口令", type="password", placeholder="請向右側領取口令")
 
 with col2:
-    st.write("### 🔑 2. 領取口令")
-    # 直接回歸 LINE 引流，不繞圈子
-    st.markdown("#### [ 點擊加 LINE 領取今日口令 ]")
-    st.info("請添加 ID: (你的LINE ID) 並支付 100 元")
-    st.write("✅ 支付後即刻發放解鎖口令")
+    st.write("### 💰 第二步：領取口令")
+    # 強制讀取你給的那張 QR Code，若找不到則顯示文字備案
+    img_name = "bd9a0ca4-9261-4489-b8a3-46671766ec9b.jpg"
+    if os.path.exists(img_name):
+        st.image(img_name, width=200)
+    else:
+        st.warning("請掃描 LINE Pay 轉帳 100 元")
+    
+    st.write("👉 **轉帳 100 元並備註代碼**")
+    st.write("👉 **私訊領取口令：`8888`**")
 
 st.divider()
 
-# 3. 判定顯示區
-pwd = st.text_input("🔓 輸入解鎖口令", type="password")
-
+# 3. 暴力輸出結果
 if pwd == "8888":
     if stock_id:
         try:
             df = yf.Ticker(f"{stock_id}.TW").history(period="2d")
-            if not df.empty and len(df) >= 2:
-                now_p = df['Close'].iloc[-1]
-                old_p = df['Close'].iloc[-2]
-                diff = now_p - old_p
-                
-                # 暴力輸出
-                if diff > 0:
-                    st.markdown(f"<div style='background-color:#ff4b4b; color:white; padding:40px; text-align:center; border-radius:15px;'><h1>🔴 紅燈：多頭</h1><h3>漲跌：+{diff:.2f}</h3></div>", unsafe_allow_html=True)
-                elif diff < 0:
-                    st.markdown(f"<div style='background-color:#00c853; color:white; padding:40px; text-align:center; border-radius:15px;'><h1>🟢 綠燈：空頭</h1><h3>漲跌：{diff:.2f}</h3></div>", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"<div style='background-color:#ffd600; color:black; padding:40px; text-align:center; border-radius:15px;'><h1>🟡 黃燈：觀望</h1><h3>價格持平</h3></div>", unsafe_allow_html=True)
-                
-                st.write(f"**{stock_id} 當前價：{now_p:.2f}**")
+            now_p = df['Close'].iloc[-1]
+            diff = now_p - df['Close'].iloc[-2]
+            
+            if diff > 0:
+                st.markdown(f"<div style='background-color:#ff4b4b; color:white; padding:30px; text-align:center; border-radius:10px;'><h1>🔴 紅燈多</h1></div>", unsafe_allow_html=True)
+            elif diff < 0:
+                st.markdown(f"<div style='background-color:#00c853; color:white; padding:30px; text-align:center; border-radius:10px;'><h1>🟢 綠燈空</h1></div>", unsafe_allow_html=True)
             else:
-                st.error("代碼錯誤")
+                st.markdown(f"<div style='background-color:#888; color:white; padding:30px; text-align:center; border-radius:10px;'><h1>🟡 黃燈</h1></div>", unsafe_allow_html=True)
+            st.write(f"當前價格：{now_p:.2f}")
         except:
-            st.error("數據讀取中...")
+            st.error("代碼有誤或數據讀取中")
 else:
-    st.warning("🔒 請輸入正確口令以開啟數據公理。")
-
-st.divider()
-st.caption("Axiom 系統：不提供建議，只提供物理級數據結果。")
+    st.info("🔒 請完成支付後輸入口令解鎖訊號")

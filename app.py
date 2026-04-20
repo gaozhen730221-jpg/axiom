@@ -41,4 +41,4 @@ if pwd == "8888":
     else:
         st.warning("請先輸入股票代號。")
 elif pwd != "":
-    st.error("❌ 口令錯誤，請聯繫創辦人領取。")1
+    st.error("❌ 口令錯誤，請聯繫創辦人領取。")

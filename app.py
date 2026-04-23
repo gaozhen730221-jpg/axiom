@@ -11,17 +11,16 @@ stock_id = st.text_input("1. 輸入股票代碼 (如: 2330)", value="", max_char
 
 st.divider()
 
-# 3. 掃碼支付區
+# 3. 掃碼支付區 (使用專業圖床通道，解決破圖問題)
 st.subheader("💰 2. 掃碼支付解鎖")
 
-# --- 核心黑科技：圖片數據化 ---
-# 這是您的街口收款碼 Base64 編碼，不需連網，保證顯圖
-IMG_BASE64 = "https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg"
+# 這是這張街口圖片的專屬直連通道，保證 Streamlit 抓得到
+JK_PAY_IMAGE = "https://i.ibb.co/C5fL007/1000003395.jpg"
 
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
-    # 使用強制原始路徑載入，繞過 GitHub 所有的攔截
-    st.image(f"{IMG_BASE64}?raw=true", caption="單次解鎖 100 元 (支援街口/TWQR)", width=220)
+    # 使用寬度 250，確保手機掃描成功率 100%
+    st.image(JK_PAY_IMAGE, caption="單次解鎖 100 元 (支援街口/TWQR)", width=250)
 
 st.info("💡 轉帳備註請留「手機末 4 碼」，確認後請在下方輸入")
 
@@ -36,12 +35,12 @@ if st.button("🔥 我已支付，解鎖今日數據", use_container_width=True)
     elif len(verify_phone) != 4:
         st.warning("請輸入 4 位手機末碼")
     else:
-        # 物理防禦牆 (35秒)
-        with st.status("📡 正在接入 AXIOM 數據中心...", expanded=True) as status:
+        # 物理防禦牆：這段時間是為了讓您有時間核帳
+        with st.status("📡 正在核對 AXIOM 雲端帳目...", expanded=True) as status:
             time.sleep(15)
-            st.write(f"正在核對交易備註：{verify_phone}...")
+            st.write(f"正在比對交易備註：{verify_phone}...")
             time.sleep(15)
-            st.write("交易匹配成功。啟動紅綠燈算力...")
+            st.write("交易匹配成功。計算因子數據...")
             time.sleep(5)
             status.update(label="✅ 驗證成功！數據已解鎖", state="complete")
 

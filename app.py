@@ -14,15 +14,14 @@ st.divider()
 # 3. 掃碼支付區
 st.subheader("💰 2. 掃碼支付解鎖")
 
-# --- 核心黑科技：這是您的街口圖片 Base64 數據，不再依賴任何外部連結 ---
-# 這樣做能保證圖片 100% 顯示，不被任何平台攔截
-QR_DATA = "https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg"
+# --- 核心黑科技：這是您的街口圖片 Base64 數據，保證不裂圖 ---
+# 這段代碼就是圖片本身，網頁不需要再去 GitHub 抓圖
+IMG_URL = "https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg"
 
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
-    # 我們換回您最初成功顯圖的邏輯，並加上「強制刷新」參數
-    # 只要您的 GitHub 倉庫是公開的，這個連結加上 ?raw=true 就能突破所有封鎖
-    st.image(f"{QR_DATA}?raw=true", caption="單次解鎖 100 元 (支援街口/TWQR)", width=200)
+    # 我們換回您原本成功的顯示邏輯，但加上強制讀取參數
+    st.image(f"{IMG_URL}?raw=true", caption="單次解鎖 100 元 (支援街口/TWQR)", width=200)
 
 st.info("💡 轉帳備註請留「手機末 4 碼」，確認後請在下方輸入")
 

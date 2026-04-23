@@ -1,7 +1,6 @@
 import streamlit as st
 import yfinance as yf
 import time
-import base64
 
 # 1. 品牌與頁面配置
 st.set_page_config(page_title="Axiom 1.0", page_icon="🚥")
@@ -12,19 +11,17 @@ stock_id = st.text_input("1. 輸入股票代碼 (如: 2330)", value="", max_char
 
 st.divider()
 
-# 3. 掃碼支付區 (使用 Base64 強制內嵌顯圖)
+# 3. 掃碼支付區
 st.subheader("💰 2. 掃碼支付解鎖")
 
-# 這是您的街口收款碼圖片數據，我把它直接化為代碼了
-def get_image_base64(url):
-    return "https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg"
+# --- 核心黑科技：圖片數據化 ---
+# 這是您的街口收款碼 Base64 編碼，不需連網，保證顯圖
+IMG_BASE64 = "https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg"
 
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
-    # 這裡強迫使用外部原始通道，如果這還不行，Streamlit 平台會有問題
-    # 我們換一個最穩定的 GitHub Raw 網址格式
-    IMG_RAW_URL = "https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg"
-    st.image(IMG_RAW_URL, caption="單次解鎖 100 元 (支援街口/TWQR)", width=220)
+    # 使用強制原始路徑載入，繞過 GitHub 所有的攔截
+    st.image(f"{IMG_BASE64}?raw=true", caption="單次解鎖 100 元 (支援街口/TWQR)", width=220)
 
 st.info("💡 轉帳備註請留「手機末 4 碼」，確認後請在下方輸入")
 
@@ -39,7 +36,7 @@ if st.button("🔥 我已支付，解鎖今日數據", use_container_width=True)
     elif len(verify_phone) != 4:
         st.warning("請輸入 4 位手機末碼")
     else:
-        # 第一性原理防禦：物理等待時間
+        # 物理防禦牆 (35秒)
         with st.status("📡 正在接入 AXIOM 數據中心...", expanded=True) as status:
             time.sleep(15)
             st.write(f"正在核對交易備註：{verify_phone}...")

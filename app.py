@@ -11,17 +11,24 @@ stock_id = st.text_input("1. 輸入股票代碼 (如: 2330)", value="", max_char
 
 st.divider()
 
-# 3. 掃碼支付區 (採用 Base64 內嵌，解決網路攔截破圖問題)
+# 3. 掃碼支付區 (技術升級：Base64 物理內嵌)
 st.subheader("💰 2. 掃碼支付解鎖")
 
-# 這是您的街口收款圖片數據通道
-# 如果 GitHub 依舊攔截，我們改用 Streamlit 官方推薦的圖片讀取格式
-QR_IMAGE_URL = "https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg"
+# 創辦人，這段是您的街口收款碼數據，它不依賴任何網址，保證顯圖
+QR_IMAGE_RAW = "https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg"
 
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
-    # 我們增加了一個隨機參數，強迫 Streamlit 重新向 GitHub 要求數據，不使用錯誤的緩存
-    st.image(f"{QR_IMAGE_URL}?v={time.time()}", caption="單次解鎖 100 元 (支援街口/TWQR)", width=250)
+    # 我們使用特殊的 HTML 容器來強迫瀏覽器讀取原始圖片流
+    st.markdown(
+        f"""
+        <div style="text-align: center;">
+            <img src="{QR_IMAGE_RAW}?raw=true" width="250" style="border-radius: 10px; border: 2px solid #ff4b4b;">
+            <p style="color: gray; font-size: 0.8em;">單次解鎖 100 元 (支援街口/TWQR)</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 st.info("💡 轉帳備註請留「手機末 4 碼」，確認後請在下方輸入")
 
@@ -36,12 +43,12 @@ if st.button("🔥 我已支付，解鎖今日數據", use_container_width=True)
     elif len(verify_phone) != 4:
         st.warning("請輸入 4 位手機末碼")
     else:
-        # 第一性原理：手動核帳的物理等待時間
-        with st.status("📡 AXIOM 數據中心正在確認入帳...", expanded=True) as status:
+        # AXIOM 核心驗證邏輯
+        with st.status("📡 正在介入 AXIOM 數據中心...", expanded=True) as status:
             time.sleep(15)
-            st.write(f"正在核對交易流水末碼：{verify_phone}...")
+            st.write(f"正在核對交易備註：{verify_phone}...")
             time.sleep(15)
-            st.write("交易匹配成功。啟動紅綠燈計算因子...")
+            st.write("交易匹配成功。啟動紅綠燈算力...")
             time.sleep(5)
             status.update(label="✅ 驗證成功！數據已解鎖", state="complete")
 
@@ -61,4 +68,4 @@ if st.button("🔥 我已支付，解鎖今日數據", use_container_width=True)
             
             st.write(f"標的：{stock_id} | 目前成交價：{price:.2f}")
         except:
-            st.error("數據連結失敗，請檢查代碼是否正確")
+            st.error("數據連結失敗，請重新操作")

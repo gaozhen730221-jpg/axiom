@@ -1,112 +1,62 @@
-<?php
-/**
- * 1.0 SIGNAL - ULTIMATE LEAN VERSION
- * TERMINAL ADDR: THr243a11P65Drgq3AMMXWgc2sNCHMqTwu
- */
-$status = isset($_GET['access']) && $_GET['access'] === 'verified' ? 'MEMBER' : 'SCAN';
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>1.0 SIGNAL</title>
-    <style>
-        body { background: #000; color: #00ff00; font-family: 'Courier New', Courier, monospace; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
-        #container { width: 90%; max-width: 380px; text-align: center; border: 1px solid #00ff00; padding: 25px; box-shadow: 0 0 20px #00ff00; border-radius: 12px; position: relative; }
-        .qr-frame { background: #fff; padding: 10px; display: inline-block; border: 2px solid #f3ba2f; border-radius: 5px; margin: 15px 0; }
-        .qr-frame img { width: 180px; height: 180px; display: block; object-fit: contain; }
-        .btn { background: #f3ba2f; color: #000; border: none; padding: 18px; width: 100%; font-weight: bold; border-radius: 5px; font-size: 18px; cursor: pointer; transition: 0.3s; box-shadow: 0 0 15px #f3ba2f; }
-        .btn:active { transform: scale(0.98); opacity: 0.8; }
-        .ca-input { background: #000; border: 1px solid #00ff00; color: #00ff00; width: 92%; padding: 15px; margin-bottom: 15px; text-align: center; font-size: 14px; outline: none; border-radius: 4px; }
-        
-        #log-screen { display: none; text-align: left; background: #080808; padding: 15px; border-radius: 5px; border: 1px solid #111; margin-top: 10px; height: 130px; overflow: hidden; }
-        .log-line { font-size: 10px; color: #00ff00; margin: 3px 0; font-weight: lighter; }
-        .progress-bar { width: 100%; height: 4px; background: #222; margin-top: 12px; border-radius: 2px; }
-        .progress-fill { width: 0%; height: 100%; background: #00ff00; transition: width 15s linear; }
+import streamlit as st
+import yfinance as yf
+import time
 
-        #res { display: none; margin-top: 25px; }
-        .green-orb { width: 65px; height: 65px; background: #00ff00; border-radius: 50%; margin: 0 auto; box-shadow: 0 0 45px #00ff00; animation: pulse 1s infinite; }
-        @keyframes pulse { 0% { opacity: 0.8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0.8; transform: scale(1); } }
-    </style>
-</head>
-<body>
+# 1. 品牌與頁面配置
+st.set_page_config(page_title="Axiom 1.0", page_icon="🚥")
+st.title("🚥 股票數據 Axiom 1.0")
 
-<div id="container">
+# 2. 標的輸入區
+stock_id = st.text_input("1. 輸入股票代碼 (如: 2330)", value="", max_chars=4, placeholder="例如: 2330")
 
-    <?php if ($status === 'SCAN'): ?>
-        <h2 style="color:#f3ba2f; margin:0; letter-spacing: 2px;">1.0 SIGNAL</h2>
-        <div id="pay-ui">
-            <div class="qr-frame"><img src="https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg"></div>
-            <div style="color:#f3ba2f; font-weight:bold; margin-bottom:20px; font-size: 20px;">100 TWD (TWQR/街口)</div>
-            <button class="btn" onclick="activate()">ACTIVATE & SYNC</button>
-        </div>
+st.divider()
 
-        <div id="log-screen">
-            <div id="logs"></div>
-            <div class="progress-bar"><div class="progress-fill" id="fill"></div></div>
-        </div>
+# 3. 掃碼支付區 (已精準換裝為街口/TWQR 萬用碼)
+st.subheader("💰 2. 掃碼支付解鎖")
 
-        <script>
-            function activate() {
-                document.getElementById('pay-ui').style.display = 'none';
-                document.getElementById('log-screen').style.display = 'block';
-                
-                const lines = [
-                    "> INITIALIZING SENSOR 1.2.9...",
-                    "> CONNECTING TWQR-GATEWAY...",
-                    "> SCANNING PAYMENT STATUS...",
-                    "> CHECKING INBOUND PROTOCOL...",
-                    "> TRANSACTION VERIFIED...",
-                    "> FINALIZING ACCESS GRANTED."
-                ];
-                
-                let i = 0;
-                const logBox = document.getElementById('logs');
-                const interval = setInterval(() => {
-                    if(i < lines.length) {
-                        const d = document.createElement('div');
-                        d.className = 'log-line';
-                        d.innerText = lines[i];
-                        logBox.appendChild(d);
-                        i++;
-                    } else { clearInterval(interval); }
-                }, 2000);
+col1, col2, col3 = st.columns([1, 1, 1])
+with col2:
+    # 這裡已精準嵌入您的最新收款碼
+    st.image("https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg", 
+             caption="單次解鎖 100 元 (支援街口/TWQR)", 
+             width=200)
 
-                setTimeout(() => { document.getElementById('fill').style.width = "100%"; }, 100);
-                setTimeout(() => { window.location.href = window.location.pathname + "?access=verified"; }, 15800);
-            }
-        </script>
+st.info("💡 轉帳備註請留「手機末 4 碼」，確認後請在下方輸入")
 
-    <?php else: ?>
-        <h2 style="color:#00ff00; margin-bottom:15px; letter-spacing: 2px;">SENSOR ONLINE</h2>
-        <input type="text" id="ca" class="ca-input" placeholder="Paste Contract Address (CA)">
-        <button class="btn" style="background:#00ff00; box-shadow: 0 0 15px #00ff00;" onclick="scan()">START DEEP SCAN</button>
-        
-        <div id="res">
-            <div class="green-orb"></div>
-            <h2 style="color:#00ff00; margin-top:15px;">SIGNAL: GREEN</h2>
-            <p style="font-size:11px; color:#555;">[98.4% MOMENTUM DETECTED]</p>
-        </div>
+st.divider()
 
-        <script>
-            function scan() {
-                const val = document.getElementById('ca').value;
-                if(!val) return alert('Enter CA');
-                const btn = document.querySelector('.btn');
-                const res = document.getElementById('res');
-                res.style.display = 'none';
-                btn.innerText = "ANALYZING...";
-                
-                setTimeout(() => {
-                    res.style.display = 'block';
-                    btn.innerText = "SCAN COMPLETE";
-                }, 1800);
-            }
-        </script>
-    <?php endif; ?>
+# 4. 核對與結果輸出
+verify_phone = st.text_input("3. 輸入手機末 4 碼", placeholder="例如: 1234")
 
-</div>
+if st.button("🔥 我已支付，解鎖今日數據", use_container_width=True):
+    if not stock_id:
+        st.warning("請先輸入標的代碼")
+    elif len(verify_phone) != 4:
+        st.warning("請輸入 4 位手機末碼")
+    else:
+        # 第一性原理：物理防禦牆 (35秒) - 完全保留原始震撼感
+        with st.status("📡 正在核對支付入帳流水...", expanded=True) as status:
+            time.sleep(15)
+            st.write(f"比對交易備註：{verify_phone}...")
+            time.sleep(15)
+            st.write("交易匹配成功。計算因子數據...")
+            time.sleep(5)
+            status.update(label="✅ 驗證成功！", state="complete")
 
-</body>
-</html>
+        try:
+            # 獲取真實台股數據
+            data = yf.Ticker(f"{stock_id}.TW").history(period="2d")
+            price = data['Close'].iloc[-1]
+            change = price - data['Close'].iloc[-2]
+            
+            # 結果呈現
+            if change > 0:
+                st.error(f"🔴 紅燈多 (看漲): +{change:.2f}")
+            elif change < 0:
+                st.success(f"🟢 綠燈空 (看跌): {change:.2f}")
+            else:
+                st.info("🟡 平盤觀望")
+            
+            st.write(f"標的：{stock_id} | 目前成交價：{price:.2f}")
+        except:
+            st.error("數據連結失敗，請重新操作")

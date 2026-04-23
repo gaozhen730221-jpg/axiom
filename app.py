@@ -1,6 +1,7 @@
 import streamlit as st
 import yfinance as yf
 import time
+import os
 
 # 1. 品牌與頁面配置
 st.set_page_config(page_title="Axiom 1.0", page_icon="🚥")
@@ -14,14 +15,18 @@ st.divider()
 # 3. 掃碼支付區
 st.subheader("💰 2. 掃碼支付解鎖")
 
-# 使用 Base64 強制內嵌圖片，解決 GitHub 連結失效問題
-# 這是我幫您封裝好的街口收款碼數據
-QR_CODE_IMAGE = "https://gaozhen730221-jpg.github.io/axiom/1000003395.jpg"
-
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
-    # 這裡改成嘗試直接讀取，如果 GitHub 還是讀不到，請確保圖片檔名在倉庫根目錄是正確的
-    st.image(QR_CODE_IMAGE, caption="單次解鎖 100 元 (支援街口/TWQR)", width=200)
+    # 💥 直接從您的 GitHub 倉庫路徑讀取檔案，不經過外部 API
+    # 請確保檔案 1000003395.jpg 就在 app.py 的旁邊
+    image_path = "1000003395.jpg"
+    
+    if os.path.exists(image_path):
+        st.image(image_path, caption="單次解鎖 100 元 (支援街口/TWQR)", width=200)
+    else:
+        # 如果檔案讀不到，我強制用網頁連結再試一次
+        st.image("https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg", 
+                 caption="單次解鎖 100 元 (支援街口/TWQR)", width=200)
 
 st.info("💡 轉帳備註請留「手機末 4 碼」，確認後請在下方輸入")
 

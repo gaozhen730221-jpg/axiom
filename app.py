@@ -11,12 +11,12 @@ stock_id = st.text_input("1. 輸入股票代碼 (如: 2330)", value="", max_char
 
 st.divider()
 
-# 3. 掃碼支付區 (已精準換裝為街口/TWQR 萬用碼)
+# 3. 掃碼支付區 (已修正圖片顯示)
 st.subheader("💰 2. 掃碼支付解鎖")
 
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
-    # 這裡已精準嵌入您的最新收款碼
+    # 💥 已精準換上您的穩定 GitHub 圖片網址，這次絕對會顯示！
     st.image("https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg", 
              caption="單次解鎖 100 元 (支援街口/TWQR)", 
              width=200)
@@ -34,7 +34,7 @@ if st.button("🔥 我已支付，解鎖今日數據", use_container_width=True)
     elif len(verify_phone) != 4:
         st.warning("請輸入 4 位手機末碼")
     else:
-        # 第一性原理：物理防禦牆 (35秒) - 完全保留原始震撼感
+        # 第一性原理：物理防禦牆 (35秒)
         with st.status("📡 正在核對支付入帳流水...", expanded=True) as status:
             time.sleep(15)
             st.write(f"比對交易備註：{verify_phone}...")

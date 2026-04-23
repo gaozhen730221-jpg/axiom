@@ -11,20 +11,16 @@ stock_id = st.text_input("1. 輸入股票代碼 (如: 2330)", value="", max_char
 
 st.divider()
 
-# 3. 掃碼支付區 (終極解決方案：不再連網抓圖)
+# 3. 掃碼支付區 (直接讀取同資料夾內的圖片：1776940866671.jpg)
 st.subheader("💰 2. 掃碼支付解鎖")
-
-# 這是您的街口 QR Code 的數據化路徑，我們改用 Streamlit 最穩定的靜態渲染方式
-# 我們將圖片直接託管在 Streamlit 官方緩存中
-QR_URL = "https://raw.githubusercontent.com/gaozhen730221-jpg/axiom/main/1000003395.jpg"
 
 col1, col2, col3 = st.columns([1, 1, 1])
 with col2:
-    # 這裡我們強迫 Streamlit 以「不緩存」的方式重新獲取，並提供備用連結
+    # 這裡的檔名必須跟您剛才上傳的一模一樣
     try:
-        st.image(QR_URL, caption="單次解鎖 100 元 (支援街口/TWQR)", width=250)
+        st.image("1776940866671.jpg", caption="單次解鎖 100 元 (支援街口/TWQR)", width=250)
     except:
-        st.markdown(f"[📡 點此手動顯示 QR Code]({QR_URL})")
+        st.error("⚠️ 圖片讀取失敗，請確認檔案已存在 GitHub 資料夾中")
 
 st.info("💡 轉帳備註請留「手機末 4 碼」，確認後請在下方輸入")
 
@@ -34,34 +30,29 @@ st.divider()
 verify_phone = st.text_input("3. 輸入手機末 4 碼", placeholder="例如: 1234")
 
 if st.button("🔥 我已支付，解鎖今日數據", use_container_width=True):
-    if not stock_id:
-        st.warning("請先輸入標的代碼")
-    elif len(verify_phone) != 4:
-        st.warning("請輸入 4 位手機末碼")
+    if not stock_id or len(verify_phone) != 4:
+        st.warning("請完整輸入代碼與手機末 4 碼")
     else:
-        # AXIOM 核帳物理防禦
-        with st.status("📡 正在接入 AXIOM 數據中心...", expanded=True) as status:
+        with st.status("📡 正在核對 AXIOM 數據中心...", expanded=True) as status:
             time.sleep(15)
-            st.write(f"正在核對交易流水末碼：{verify_phone}...")
+            st.write(f"正在核對交易備註：{verify_phone}...")
             time.sleep(15)
-            st.write("交易匹配成功。啟動紅綠燈計算因子...")
+            st.write("交易匹配成功。啟動紅綠燈算力...")
             time.sleep(5)
-            status.update(label="✅ 驗證成功！數據已解鎖", state="complete")
+            status.update(label="✅ 驗證成功！", state="complete")
 
         try:
-            # 獲取台股真實數據
             data = yf.Ticker(f"{stock_id}.TW").history(period="2d")
             price = data['Close'].iloc[-1]
             change = price - data['Close'].iloc[-2]
             
             st.divider()
             if change > 0:
-                st.error(f"🔴 AXIOM 訊號：紅燈多 (看漲) | 變動: +{change:.2f}")
+                st.error(f"🔴 AXIOM 訊號：紅燈多 (看漲) | +{change:.2f}")
             elif change < 0:
-                st.success(f"🟢 AXIOM 訊號：綠燈空 (看跌) | 變動: {change:.2f}")
+                st.success(f"🟢 AXIOM 訊號：綠燈空 (看跌) | {change:.2f}")
             else:
                 st.info("🟡 AXIOM 訊號：平盤觀望")
-            
             st.write(f"標的：{stock_id} | 目前成交價：{price:.2f}")
         except:
-            st.error("數據連結失敗，請重新操作")
+            st.error("數據連結失敗，請檢查代碼")

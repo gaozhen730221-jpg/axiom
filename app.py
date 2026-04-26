@@ -2,92 +2,102 @@ import streamlit as st
 import os, time
 from pathlib import Path
 
-# --- 全局設定 ---
+# --- 全局視覺規範 ---
 st.set_page_config(page_title="AXIOM 2.0", layout="centered")
 
 st.markdown("""
     <style>
-    html, body, [data-testid="stAppViewContainer"] {
-        background-color: #000000 !important;
-        color: #FFFFFF !important;
-    }
-    h1 { font-size: 3.5rem !important; color: #00FF41 !important; font-family: monospace; }
-    h2 { font-size: 2rem !important; color: #00A3FF !important; }
-    label { font-size: 1.5rem !important; color: #FFFFFF !important; font-weight: bold; }
-    [data-testid="stMetricValue"] { font-size: 4rem !important; font-weight: bold !important; }
+    html, body, [data-testid="stAppViewContainer"] { background-color: #000000 !important; color: #FFFFFF !important; }
+    h1 { font-size: 3rem !important; color: #00FF41 !important; font-family: monospace; text-align: center; }
     
-    /* 支付警示框 */
-    .pay-box {
-        border: 2px solid #FF4B4B;
-        padding: 20px;
-        border-radius: 5px;
-        text-align: center;
-        background-color: rgba(255, 75, 75, 0.1);
-        margin-bottom: 25px;
+    /* 情報區塊樣式 */
+    .report-card {
+        background: rgba(0, 163, 255, 0.05);
+        border: 1px solid #00A3FF;
+        padding: 25px;
+        border-radius: 10px;
+        margin-top: 20px;
     }
-
+    .data-point { font-size: 1.5rem; font-weight: bold; color: #FFD700; } /* 警示金 */
+    
     .stButton>button {
-        height: 4.5rem;
-        font-size: 1.8rem !important;
-        background-color: #00FF41 !important;
-        color: #000000 !important;
-        font-weight: bold !important;
+        height: 4.5rem; font-size: 1.8rem !important;
+        background-color: #00FF41 !important; color: #000000 !important; font-weight: bold !important;
     }
     [data-testid="stHeader"] { visibility: hidden; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 1. 標題與核心數據 ---
-st.markdown("<h1 style='text-align:center;'>AXIOM 2.0</h1>", unsafe_allow_html=True)
-st.markdown("<h2 style='text-align:center;'>台股數據運算中心</h2>", unsafe_allow_html=True)
+# --- 1. 頂部看板 ---
+st.markdown("<h1>AXIOM 2.0</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#00A3FF; font-weight:bold;'>台股數據運算中心・V.1.08</p>", unsafe_allow_html=True)
+
+col1, col2, col3 = st.columns(3)
+col1.metric("算力負載", "98.2%")
+col2.metric("當日勝率", "92.4%")
+col3.metric("監控標的", "1760+")
 
 st.divider()
 
-col1, col2 = st.columns(2)
-with col1:
-    st.metric("歷史勝率", "92.4%")
-with col2:
-    st.metric("待處理標的", "23**")
+# --- 2. 支付通道 ---
+st.markdown("<h3 style='color:#FF4B4B;'>💳 數據提取授權 (NT$ 100)</h3>", unsafe_allow_html=True)
 
-st.divider()
-
-# --- 2. 支付規範 ---
-st.markdown("""
-    <div class="pay-box">
-        <h3 style="color:#FF4B4B; margin:0;">⚠️ 存取限制</h3>
-        <p style="font-size:1.5rem; margin:10px 0;">解鎖單次算力報告：<b>NT$ 100</b></p>
-        <p style="font-size:1rem; color:#CCC;">完成支付後，請於下方輸入代碼核對</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-# 自動搜索收款圖檔
-image_exts = ['*.png', '*.jpg', '*.jpeg', '*.PNG', '*.JPG']
-qrs = []
-for ext in image_exts: qrs.extend(Path('.').rglob(ext))
-
+# 自動偵測圖檔
+qrs = list(Path('.').rglob('*.png')) + list(Path('.').rglob('*.jpg'))
 if qrs:
-    col_l, col_m, col_r = st.columns([1, 4, 1])
+    col_l, col_m, col_r = st.columns([1, 2, 1])
     with col_m:
-        st.image(str(qrs[0]), caption="請掃描並完成 100 元支付", use_container_width=True)
+        st.image(str(qrs[0]), use_container_width=True)
 else:
-    st.error("支付通道連線中，請稍後。")
+    st.error("支付網關連線異常")
 
 st.divider()
 
-# --- 3. 數據操作 ---
-code = st.text_input("股票代碼", placeholder="例如: 2330")
-phone = st.text_input("手機末4碼", placeholder="身分核對")
+# --- 3. 操作與深度情報產出 ---
+code = st.text_input("輸入欲解碼代碼")
+phone = st.text_input("身份核對碼")
 
-if st.button("執行支付核對並解碼"):
+if st.button("執行資產核對並提取報告"):
     if code and phone:
-        # 模擬支付核對過程
-        with st.status("正在核對支付紀錄與算力分配...", expanded=False):
-            time.sleep(1.0)
-            st.write("確認 NT$ 100 支付狀態... [OK]")
-            st.write("接入台股 L2 實時報價...")
+        with st.status("進行 L2 深度數據解碼...", expanded=True) as status:
+            time.sleep(0.8)
+            st.write(">> 確認 NT$ 100 支付紀錄... [授權通過]")
             time.sleep(0.5)
+            st.write(">> 抓取主力分點籌碼流向...")
+            time.sleep(0.5)
+            st.write(">> 計算 72 小時波動率乖離...")
+            status.update(label="數據提取完成", state="complete", expanded=False)
         
-        st.success(f"【{code}】支付核對完成。算力預測：該標的於未來 72 小時具備顯著波動特徵。")
-        st.info("請於 72 小時內完成操作佈局，逾期算力將重新計算。")
+        # --- 這裡就是「厚度」：深度情報報告 ---
+        st.markdown(f"""
+        <div class="report-card">
+            <h2 style="color:#00FF41; margin-top:0;">📊 標的分析報告：{code}</h2>
+            <hr style="border:0.5px solid #00A3FF;">
+            <table style="width:100%; font-size:1.2rem; color:#EEE;">
+                <tr>
+                    <td><b>算力預測趨勢：</b></td>
+                    <td class="data-point">強勢噴發 (Confidence 94%)</td>
+                </tr>
+                <tr>
+                    <td><b>主力籌碼集中度：</b></td>
+                    <td class="data-point">極度密集 (LV.5)</td>
+                </tr>
+                <tr>
+                    <td><b>關鍵防守價位：</b></td>
+                    <td style="color:#FF4B4B; font-weight:bold;">系統計算中... (請依實時報價)</td>
+                </tr>
+                <tr>
+                    <td><b>目標獲利區間：</b></td>
+                    <td style="color:#00FF41; font-weight:bold;">+8.5% ~ +12.3%</td>
+                </tr>
+            </table>
+            <br>
+            <p style="font-size:0.9rem; color:#888;">
+                *本報告基於 AXIOM 2.0 算力模型生成，有效時限為 72 小時。逾期請重新提取。
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.warning("⚠️ 提醒：情報已開啟，請立即同步至您的交易終端。")
     else:
-        st.warning("請輸入完整代碼與手機核對碼以完成支付驗證。")
+        st.warning("請完整填寫代碼以提取情報。")

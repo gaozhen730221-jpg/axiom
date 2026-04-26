@@ -2,56 +2,97 @@ import streamlit as st
 import os, time
 from pathlib import Path
 
-# AXIOM 2.1 | 數據與金流絕對同步版
-st.set_page_config(page_title="AXIOM 2.1", layout="centered")
+# --- 2.0 終端視覺重塑 ---
+st.set_page_config(page_title="AXIOM 2.0", layout="centered")
 
-# 極簡視覺 (移除所有 Streamlit 標籤與雜訊)
 st.markdown("""
     <style>
-    [data-testid="stHeader"] { visibility: hidden; }
-    html, body, [data-testid="stAppViewContainer"] { background-color: #FFFFFF; color: #000000; font-family: sans-serif; }
-    .stTextInput input { background-color: #F8F9FA !important; border: 1px solid #000000 !important; border-radius: 2px; }
-    .stButton>button { background-color: #000000; color: #FFFFFF; width: 100%; border: none; height: 3.5rem; font-size: 1.2rem; }
-    [data-testid="stMetricValue"] { font-size: 3rem !important; font-weight: bold !important; }
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@400;700&display=swap');
+    
+    /* 深度背景：利用漸層消除平裝感 */
+    html, body, [data-testid="stAppViewContainer"] {
+        background: radial-gradient(circle at center, #001529 0%, #00050a 100%) !important;
+        color: #00FF41 !important;
+        font-family: 'Noto Sans TC', sans-serif;
+    }
+    
+    /* 玻璃擬態卡片：讓數據浮起來 */
+    .stMetric {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(0, 255, 65, 0.2);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 255, 65, 0.1);
+    }
+    
+    /* 科技感按鈕：黑金霓虹 */
+    .stButton>button {
+        background: transparent;
+        color: #00FF41;
+        border: 1px solid #00FF41;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: bold;
+        letter-spacing: 2px;
+        height: 3.5rem;
+        transition: 0.3s;
+        box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.2);
+    }
+    .stButton>button:hover {
+        background: #00FF41;
+        color: #000;
+        box-shadow: 0 0 20px #00FF41;
+    }
+    
+    /* 隱藏所有雜訊 */
+    [data-testid="stHeader"], [data-testid="stFooter"] { visibility: hidden; }
     </style>
     """, unsafe_allow_html=True)
 
-# 1. 核心數據指標
-st.write("## AXIOM 2.1")
-c1, c2 = st.columns(2)
-c1.metric("當前算力勝率", "92.4%")
-c2.metric("已解碼標的", "23**")
+# --- 第一章：算力核心展示 ---
+st.markdown("<h1 style='text-align: center; font-family: Orbitron; letter-spacing: 5px;'>AXIOM 2.0</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #00A3FF;'>TAIWAN STOCK CORE COMPUTING</p>", unsafe_allow_html=True)
 
-st.divider()
+col1, col2 = st.columns(2)
+with col1:
+    st.metric("算力解碼勝率", "92.4%", "+1.2%")
+with col2:
+    st.metric("待變現標的", "23**", "CONFIDENTIAL")
 
-# 2. 自動金流通道偵測 (不管圖檔在哪個資料夾，只要是圖片就抓出來)
-st.write("### 🏦 資產授權掃描")
+st.markdown("---")
 
-# 執行長：這裡建立自動搜索邏輯，掃描根目錄下所有 png/jpg
-image_extensions = ['*.png', '*.jpg', '*.jpeg', '*.PNG', '*.JPG']
-qr_files = []
-for ext in image_extensions:
-    qr_files.extend(Path('.').rglob(ext))
+# --- 第二章：資產通道自動偵測 ---
+# 不管你檔案丟哪，AI 自動找出來呈現
+image_exts = ['*.png', '*.jpg', '*.jpeg', '*.PNG', '*.JPG']
+qrs = []
+for ext in image_exts: qrs.extend(Path('.').rglob(ext))
 
-if qr_files:
-    # 抓取搜尋到的第一張圖片（通常就是你的收款碼）
-    target_qr = qr_files[0]
+if qrs:
     col_l, col_m, col_r = st.columns([1, 2, 1])
     with col_m:
-        st.image(str(target_qr), caption="掃描進行算力授權", use_container_width=True)
+        st.markdown("<p style='text-align:center; font-size:12px; color:#888;'>SCAN TO AUTHORIZE</p>", unsafe_allow_html=True)
+        st.image(str(qrs[0]), use_container_width=True)
 else:
-    st.error("【系統警告】未偵測到資產圖檔，請確認圖片已上傳至 GitHub。")
+    st.error("SYSTEM ERROR: 資產通道未連結")
 
-st.divider()
+st.markdown("---")
 
-# 3. 執行區
-code = st.text_input("輸入欲解碼代碼")
-phone = st.text_input("驗證手機末 4 碼")
+# --- 第三章：神諭擷取儀式 ---
+code = st.text_input("INPUT STOCK CODE", placeholder="例: 2330")
+phone = st.text_input("SECURITY VERIFICATION (4-DIGIT)", placeholder="手機末4碼")
 
-if st.button("獲取算力預測結果"):
+if st.button("ACTIVATE ORACLE"):
     if code and phone:
-        with st.status("算力核對中...", expanded=False):
-            time.sleep(0.4)
-        st.success(f"標的 {code}：算力已鎖定。未來 72 小時具備強烈突破訊號。")
+        # 儀式感延遲：讓股民覺得電腦在「算」
+        progress_text = st.empty()
+        bar = st.progress(0)
+        logs = ["連線算力陣列...", "同步 L2 數據流...", "繞過防火牆...", "解密標的神諭..."]
+        
+        for i in range(100):
+            time.sleep(0.01)
+            bar.progress(i + 1)
+            if i % 25 == 0: progress_text.text(logs[i//25])
+        
+        st.success(f"【算力神諭：{code}】解碼完成。未來 72 小時具備強烈突破訊號。")
+        st.markdown("<p style='color:red; text-align:center; font-size:12px;'>⚠️ 警告：遺憾是昂貴的。您已錯過上週 22.4% 的潛在漲幅。</p>", unsafe_allow_html=True)
     else:
-        st.warning("請完整填寫資訊以利核對。")
+        st.warning("請輸入完整驗證資訊。")

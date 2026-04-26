@@ -1,59 +1,42 @@
 import streamlit as st
 import os
 
-# --- 1.0 極致視覺設定 ---
-st.set_page_config(page_title="AXIOM 1.0", layout="centered")
+# --- 1.1 極致簡約視覺 ---
+st.set_page_config(page_title="AXIOM 1.1", layout="centered")
 
 st.markdown("""
     <style>
-    .stApp { background-color: #0c0e11; color: #ffffff; }
-    .tesla-card { border: 1px solid #333; padding: 25px; border-radius: 4px; background: #14171c; margin-bottom: 20px; }
-    .hunt-box { background: linear-gradient(90deg, #1d2229, #0c0e11); border-left: 5px solid #00ff41; padding: 18px; margin: 12px 0; }
-    .pay-zone { border: 2px solid #00ff41; background-color: #1a1d23; padding: 25px; border-radius: 8px; text-align: center; }
+    .stApp { background-color: #0c0e11; color: #ffffff; text-align: center; }
+    .gold-box { border: 2px solid #00ff41; padding: 20px; border-radius: 10px; background: #14171c; margin-top: 10px; }
+    .target-card { background: #1d2229; padding: 15px; border-left: 5px solid #00ff41; margin: 10px 0; text-align: left; font-size: 18px; }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown("<h1 style='text-align: center; letter-spacing: 5px;'>AXIOM 1.0</h1>", unsafe_allow_html=True)
+# 標題
+st.markdown("<h1 style='letter-spacing: 8px;'>AXIOM 1.1</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color: #00ff41;'>算力已鎖定：今日必賺三箭</p>", unsafe_allow_html=True)
 
-# --- 1. 誘惑區：最強三箭 ---
+# --- 第一層：誘餌 (直接給看一半，誘發 FOMO) ---
 st.markdown("""
-<div class='tesla-card'>
-    <p style='color: #00ff41; font-size: 12px; letter-spacing: 2px; text-align: center;'>● AXIOM REAL-TIME CLOUD</p>
-    <div class='hunt-box'>🎯 標 A：23** <span style='float: right; color: #00ff41;'>勝率 92%</span></div>
-    <div class='hunt-box'>🎯 標 B：62** <span style='float: right; color: #00ff41;'>多頭 89%</span></div>
-    <div class='hunt-box'>🎯 標 C：30** <span style='float: right; color: #ff4141;'>預警 94%</span></div>
-</div>
+<div class='target-card'>🎯 潛力 A：23** <span style='float: right; color: #00ff41;'>預計漲幅 +7%</span></div>
+<div class='target-card'>🎯 潛力 B：62** <span style='float: right; color: #00ff41;'>大戶掃貨 89%</span></div>
+<div class='target-card'>🎯 潛力 C：30** <span style='float: right; color: #00ff41;'>主力洗盤結束</span></div>
 """, unsafe_allow_html=True)
 
-# --- 2. 診斷輸入區 ---
-stock_input = st.text_input("", placeholder="輸入代碼解鎖算力 (如: 2330)")
+# --- 第二層：直接入金 (傻瓜式操作) ---
+st.markdown("<div class='gold-box'>", unsafe_allow_html=True)
+st.markdown("<h2 style='color: #00ff41; margin-bottom: 0;'>🔑 掃碼解鎖完整代碼</h2>", unsafe_allow_html=True)
+st.markdown("<p style='color: #888;'>單次授權費：NT$ 100</p>", unsafe_allow_html=True)
 
-# --- 3. 核心入金門戶 (只要輸入代碼就強制掃描圖檔) ---
-if stock_input:
-    st.markdown("---")
-    st.markdown("<div class='pay-zone'>", unsafe_allow_html=True)
-    st.markdown("<h3 style='color: #00ff41;'>💳 算力通道授權</h3>", unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        # --- 暴力掃描邏輯：抓取目錄下除了 app.py 以外的任何圖片 ---
-        valid_exts = ('.jpg', '.jpeg', '.png', '.JPG', '.PNG')
-        all_files = os.listdir('.')
-        # 排除 app.py，抓取第一張圖
-        img_files = [f for f in all_files if f.lower().endswith(valid_exts) and f != 'app.py']
-        
-        if img_files:
-            # 優先顯示你剛剛上傳的那張圖
-            st.image(img_files[0], width=230, caption="長按掃碼支付 NT$ 100")
-        else:
-            st.error("⚠️ 倉庫偵測不到圖檔")
-            st.info("請確認 GitHub Commit 成功。")
-            
-    with col2:
-        st.write("支付完成後核對：")
-        last_4 = st.text_input("手機末 4 碼", max_chars=4, key="v4")
-        if st.button("確認解鎖 (UNLOCK)", use_container_width=True):
-            st.success("算力正在開啟... 請稍候")
-    st.markdown("</div>", unsafe_allow_html=True)
+# 自動抓取圖檔
+img_files = [f for f in os.listdir('.') if f.lower().endswith(('.png', '.jpg', '.jpeg')) and f != 'app.py']
+if img_files:
+    st.image(img_files[0], width=300)
+else:
+    st.error("圖檔讀取中...請重整網頁")
 
-st.markdown("<br><p style='text-align: center; color: #222; font-size: 10px;'>AXIOM 1.0 | POWERED BY CHIEF</p>", unsafe_allow_html=True)
+st.markdown("<p style='font-size: 14px; color: #555;'>付費後系統自動跳轉明牌頁面</p>", unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
+
+# 頁尾
+st.markdown("<br><p style='color: #222;'>AXIOM 1.1 | 讓算力為您工作</p>", unsafe_allow_html=True)

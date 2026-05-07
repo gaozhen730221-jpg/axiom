@@ -22,54 +22,54 @@ def fetch_realmarket_light(code):
     data = database.get(clean_code, {"name": f"個股 {clean_code}", "big": "48.5%", "top": "進出均衡", "retail": "🟡 動作持平", "detail": "靜待流速放大。"})
     return p_s, f_s, data
 
-# --- ② 暴力視覺壓縮：手機端去蛤蜊邊排版 ---
+# --- ② 視覺定案：手機端壓縮排版 (QR Code 放大置中版) ---
 st.set_page_config(page_title="台股 1.0", layout="centered")
 st.markdown("""
     <style>
-    /* 全局背景與頂級收緊 */
+    /* 全局背景與超級收緊 */
     html, body, [data-testid="stAppViewContainer"] { background-color: #000000 !important; color: #FFFFFF !important; }
     [data-testid="stHeader"], [data-testid="stFooter"] { visibility: hidden; }
     [data-testid="stVerticalBlock"] > div { padding-top: 0rem !important; padding-bottom: 0rem !important; }
 
     @media (max-width: 640px) {
-        h1 { font-size: 1.4rem !important; text-align: center; margin: 10px 0 5px 0 !important; }
-        .sub-title { font-size: 0.75rem !important; text-align: center; color: #00FF66 !important; margin-bottom: 10px !important; }
+        h1 { font-size: 1.4rem !important; text-align: center; margin: 5px 0 2px 0 !important; } /* 標題上邊距更小 */
+        .sub-title { font-size: 0.75rem !important; text-align: center; color: #00FF66 !important; margin-bottom: 8px !important; }
         
         /* 輸入框：白字提示、高度壓縮 */
-        .stTextInput>div>div>input { background-color: #111111 !important; color: #FFFFFF !important; font-size: 1.0rem !important; height: 2.8rem !important; border: 1px solid #333 !important; }
+        .stTextInput>div>div>input { background-color: #111111 !important; color: #FFFFFF !important; font-size: 1.0rem !important; height: 2.6rem !important; border: 1px solid #333 !important; }
         .stTextInput>div>div>input::placeholder { color: #FFFFFF !important; opacity: 0.8 !important; }
         
-        /* 🚨 核心修正：100% 去除蛤蜊邊框，變成實心背景塊 */
+        /* 去蛤蜊邊、實心紅色背景提示塊 */
         .lock-box-flat { 
             background: #FF3333 !important; 
-            padding: 6px 10px; 
+            padding: 5px 8px; /* 內邊距更緊湊 */
             text-align: center; 
             color: #FFFFFF !important; 
             font-weight: 700; 
             border-radius: 4px; 
             font-size: 0.8rem !important; 
-            margin: 5px 0; 
+            margin: 3px 0; /* 上下邊距更小 */
             border: none !important; 
         }
         
-        .pay-instr { font-size: 0.75rem; color: #FFFFFF; text-align: center; margin: 3px 0; }
+        .pay-instr { font-size: 0.75rem; color: #FFFFFF; text-align: center; margin: 2px 0; }
         
-        /* 🚨 消滅街口代碼白框 */
-        [data-testid="stCodeBlock"], .stCodeBlock { display: none !important; }
+        /* 消滅街口代碼白框 */
+        [data-testid="stCodeBlock"], .stCodeBlock { display: none !important; visibility: hidden !important; height: 0px !important; }
         
         /* 螢光綠按鈕：維持霸氣但收窄間距 */
         .stButton>button { 
             background-color: #00FF66 !important; 
             color: #000000 !important; 
             width: 100%; 
-            height: 3.2rem; 
-            font-size: 1.2rem !important; 
+            height: 3.0rem; /* 按鈕稍微變窄 */
+            font-size: 1.15rem !important; /* 字體稍微變小 */
             font-weight: 900 !important; 
             border-radius: 6px !important; 
-            margin: 10px 0 !important;
+            margin: 5px 0 10px 0 !important; /* 下邊距留空 */
         }
     }
-    .disclaimer { text-align: center; color: #444444; font-size: 0.65rem; margin-top: 15px; }
+    .disclaimer { text-align: center; color: #444444; font-size: 0.65rem; margin-top: 10px; line-height: 1.1; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -85,11 +85,14 @@ target_code = code.strip() if code else "未指定"
 st.markdown(f'<div class="lock-box-flat">⚠️ 權限鎖定：開牌【 {target_code} 】最新數據包</div>', unsafe_allow_html=True)
 st.markdown("<p class='pay-instr'>💸 長按二維碼轉帳 (NT$ 99 / 檔)</p>", unsafe_allow_html=True)
 
-# 3. QR Code 極小化與居中
+# 3. 🚨 核心修正：QR Code 復活放大並且百分之百置中
 qrs = list(Path('.').rglob('*.png')) + list(Path('.').rglob('*.jpg'))
 if qrs:
-    c1, c2, c3 = st.columns([1, 0.8, 1]) # 調窄中間列，讓圖更小
-    with c2: st.image(str(qrs[-1]), width=100) # 寬度鎖死 100 像素
+    # 暴力置中：創立三個列，中間寬一點，兩邊窄一點，強制置中且放大
+    c1, c2, c3 = st.columns([0.2, 1, 0.2]) 
+    with c2: 
+        # width=220 鎖定大尺寸，清晰好掃
+        st.image(str(qrs[-1]), width=220) 
 
 # 4. 驗證開牌按鈕
 if 'stage' not in st.session_state: st.session_state.stage = "payment"

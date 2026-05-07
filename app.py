@@ -2,7 +2,7 @@ import streamlit as st
 import time
 from pathlib import Path
 
-# --- ① 數據引擎 ---
+# --- ① 決策引擎（明天直接對接真實 API 數據源） ---
 def decision_engine(code):
     signals = {
         "2330": ("🟢 主力偷吃", "🔥 準備噴發", "外資與400張以上大戶籌碼連續三日暗中進場，結構極度穩定。"),
@@ -11,17 +11,18 @@ def decision_engine(code):
     }
     return signals.get(code, ("🟡 多空下拉", "⚠️ 數據不足", "該股籌碼散亂，主力尚未做出明顯方向，建議暫不操作。"))
 
-# --- ② 極簡主義視覺框架（不加大加粗，僅修正黑底高對比） ---
+# --- ② 極簡主義視覺框架（不加大加粗，維持原始精緻與黑底高對比） ---
 st.set_page_config(page_title="台股 1.0", layout="centered")
 st.markdown("""
     <style>
+    /* 全黑底、純白字、螢光綠高對比 */
     html, body, [data-testid="stAppViewContainer"] { background-color: #000000 !important; color: #FFFFFF !important; }
     [data-testid="stHeader"], [data-testid="stFooter"] { visibility: hidden; }
     
     h1 { font-size: 3.2rem !important; font-weight: 900 !important; text-align: center; color: #FFFFFF !important; margin-bottom: 5px; }
     .sub-title { text-align: center; color: #00FF66 !important; font-weight: 700; letter-spacing: 2px; margin-bottom: 30px; }
     
-    /* 輸入框：維持精緻小巧，placeholder 強制高對比純白 */
+    /* 輸入框視覺：維持原始精緻小巧，placeholder 強制高對比純白 */
     .stTextInput>div>div>input {
         background-color: #111111 !important; color: #FFFFFF !important; 
         border: 2px solid #333333 !important; font-size: 1.4rem !important; height: 3.5rem; text-align: center;
@@ -31,9 +32,10 @@ st.markdown("""
     .stTextInput>div>div>input::-webkit-input-placeholder { color: #FFFFFF !important; }
     .stTextInput>div>div>input::-moz-placeholder { color: #FFFFFF !important; }
     
-    /* 原生 Label 標籤強制純白 */
+    /* 原生 Label 標籤強制純白，防止手機看變黑色 */
     .stTextInput label { color: #FFFFFF !important; font-size: 1rem !important; font-weight: 500; }
     
+    /* 綠色大按鈕 */
     .stButton>button {
         background-color: #00FF66 !important; color: #000000 !important;
         width: 100%; height: 5rem; font-size: 2rem !important; font-weight: 950 !important;
@@ -50,11 +52,11 @@ st.markdown("""
 st.markdown("<h1>主力底牌，一秒開牌。</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>台股 1.0 ・ L2 數據核心</p>", unsafe_allow_html=True)
 
-# ⚡ 修正 1：保留直白標籤與高對比預設字，讓人進來一秒看懂
+# 核心輸入框（保留直白標籤與純白預設提示字，絕不漏看）
 code = st.text_input("輸入台股代碼開始：", placeholder="例如: 2330")
 st.divider()
 
-# --- ③ 漏斗狀態機（徹底分離階段，絕不上下重疊） ---
+# --- ③ 核心控制漏斗（徹底分離階段，絕不上下重疊） ---
 if code:
     if len(code.strip()) > 0:
         if 'stage' not in st.session_state: 
@@ -71,6 +73,7 @@ if code:
             
             st.markdown("<h3 style='text-align:center; color:#FFFFFF;'>💸 儲存 QR Code 轉帳 (NT$ 99)</h3>", unsafe_allow_html=True)
             
+            # 自動抓取個人收款碼圖片
             qrs = list(Path('.').rglob('*.png')) + list(Path('.').rglob('*.jpg'))
             if qrs:
                 col_l, col_m, col_r = st.columns([1, 2, 1])
@@ -80,10 +83,9 @@ if code:
             
             if st.button("🔥 我已完成支付，立刻驗證看牌"):
                 st.session_state.stage = "verifying"
-                st.rerun()  # 點擊後立刻強制沖刷頁面，銷毀此階段的所有元件
+                st.rerun()  # 點擊後立刻強制沖刷頁面，銷毀此階段的所有元件，不留任何重疊殘渣
         
-        # ⚡ 修正 2：【 階段 B：180 秒強制倒數驗證 】
-        # 進入此階段時，上方的 QR Code、轉帳帳號、付費按鈕已被 rerun 徹底清空，絕對不會留在最底下。
+        # 【 階段 B：180 秒強制倒數驗證 】
         elif st.session_state.stage == "verifying":
             main_placeholder = st.empty()
             for i in range(180, -1, -1):
@@ -100,7 +102,7 @@ if code:
             
             main_placeholder.empty()
             st.session_state.stage = "unlocked"
-            st.rerun()  # 倒數結束再次清空，完美銜接最終報告
+            st.rerun()  # 倒數結束再次沖刷，完美銜接最終報告
 
         # 【 階段 C：自動開牌報告 】
         elif st.session_state.stage == "unlocked":
@@ -123,5 +125,5 @@ if code:
                 st.session_state.stage = "payment"
                 st.rerun()
 else:
-    # 初始畫面提示
+    # 初始未輸入前的純白提示字
     st.markdown("<p class='hint-text'>請在上方輸入框輸入任何台股代碼開始。</p>", unsafe_allow_html=True)

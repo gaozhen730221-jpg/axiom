@@ -2,7 +2,7 @@ import streamlit as st
 import urllib.request
 from pathlib import Path
 
-# --- ① 數據判定引擎 ---
+# --- ① 數據引擎 ---
 def fetch_realmarket_light(code):
     clean_code = code.strip()
     try:
@@ -18,81 +18,84 @@ def fetch_realmarket_light(code):
     except:
         p_s, f_s = "🟡 數據同步中", "🟢 主力籌碼流速加快"
 
-    database = {
-        "2330": {"name": "台積電", "big": "65.2%", "top": "美商高盛 (淨買超 +4,120 張)", "retail": "🔴 散戶離場", "detail": "大單追價力道強勁。"},
-        "2317": {"name": "鴻海", "big": "28.4%", "top": "摩根大通 (淨賣超 -3,200 張)", "retail": "🟢 散戶接刀", "detail": "短線賣方力道主導。"}
-    }
-    data = database.get(clean_code, {"name": f"個股 {clean_code}", "big": "48.5%", "top": "進出均衡", "retail": "🟡 動作持平", "detail": "建議靜待籌碼流速放大。"})
+    database = {"2330": {"name": "台積電", "big": "65.2%", "top": "美商高盛 (買超)", "retail": "🔴 散戶離場", "detail": "大單追價強。"}, "2317": {"name": "鴻海", "big": "28.4%", "top": "摩根大通 (賣超)", "retail": "🟢 散戶接刀", "detail": "賣方主導。"}}
+    data = database.get(clean_code, {"name": f"個股 {clean_code}", "big": "48.5%", "top": "進出均衡", "retail": "🟡 動作持平", "detail": "靜待流速放大。"})
     return p_s, f_s, data
 
-# --- ② 視覺定案：手機端降維壓縮 (去邊框版) ---
+# --- ② 暴力視覺壓縮：手機端去蛤蜊邊排版 ---
 st.set_page_config(page_title="台股 1.0", layout="centered")
 st.markdown("""
     <style>
+    /* 全局背景與頂級收緊 */
     html, body, [data-testid="stAppViewContainer"] { background-color: #000000 !important; color: #FFFFFF !important; }
     [data-testid="stHeader"], [data-testid="stFooter"] { visibility: hidden; }
-    [data-testid="stVerticalBlock"] > div { padding: 0 !important; }
+    [data-testid="stVerticalBlock"] > div { padding-top: 0rem !important; padding-bottom: 0rem !important; }
 
     @media (max-width: 640px) {
-        h1 { font-size: 1.5rem !important; text-align: center; margin: 5px 0 !important; }
-        .sub-title { font-size: 0.8rem !important; text-align: center; color: #00FF66 !important; margin-bottom: 10px !important; }
+        h1 { font-size: 1.4rem !important; text-align: center; margin: 10px 0 5px 0 !important; }
+        .sub-title { font-size: 0.75rem !important; text-align: center; color: #00FF66 !important; margin-bottom: 10px !important; }
         
-        /* 輸入框白字提示 */
-        .stTextInput>div>div>input { background-color: #111111 !important; color: #FFFFFF !important; font-size: 1.0rem !important; height: 3.0rem !important; }
-        .stTextInput>div>div>input::placeholder { color: #FFFFFF !important; opacity: 1 !important; }
+        /* 輸入框：白字提示、高度壓縮 */
+        .stTextInput>div>div>input { background-color: #111111 !important; color: #FFFFFF !important; font-size: 1.0rem !important; height: 2.8rem !important; border: 1px solid #333 !important; }
+        .stTextInput>div>div>input::placeholder { color: #FFFFFF !important; opacity: 0.8 !important; }
         
-        /* 🚨 核心修正：去邊框警告塊 */
-        .lock-box-no-border { 
+        /* 🚨 核心修正：100% 去除蛤蜊邊框，變成實心背景塊 */
+        .lock-box-flat { 
             background: #FF3333 !important; 
-            padding: 8px; 
+            padding: 6px 10px; 
             text-align: center; 
             color: #FFFFFF !important; 
             font-weight: 700; 
-            border-radius: 6px; 
-            font-size: 0.85rem !important; 
+            border-radius: 4px; 
+            font-size: 0.8rem !important; 
             margin: 5px 0; 
+            border: none !important; 
         }
         
-        /* 消滅街口代碼白框 */
-        [data-testid="stCodeBlock"] { display: none !important; }
+        .pay-instr { font-size: 0.75rem; color: #FFFFFF; text-align: center; margin: 3px 0; }
         
-        /* 按鈕收窄 */
+        /* 🚨 消滅街口代碼白框 */
+        [data-testid="stCodeBlock"], .stCodeBlock { display: none !important; }
+        
+        /* 螢光綠按鈕：維持霸氣但收窄間距 */
         .stButton>button { 
             background-color: #00FF66 !important; 
             color: #000000 !important; 
             width: 100%; 
-            height: 3.5rem; 
+            height: 3.2rem; 
             font-size: 1.2rem !important; 
-            font-weight: 800 !important; 
-            border-radius: 8px !important; 
+            font-weight: 900 !important; 
+            border-radius: 6px !important; 
+            margin: 10px 0 !important;
         }
     }
-    .disclaimer { text-align: center; color: #444444; font-size: 0.7rem; margin-top: 20px; }
+    .disclaimer { text-align: center; color: #444444; font-size: 0.65rem; margin-top: 15px; }
     </style>
     """, unsafe_allow_html=True)
 
+# 品牌標題
 st.markdown("<h1>主力底牌，一秒開牌。</h1>", unsafe_allow_html=True)
 st.markdown("<p class='sub-title'>台股 1.0 ・ L2 數據核心</p>", unsafe_allow_html=True)
 
+# 1. 股票代碼 (白字提示)
 code = st.text_input("", placeholder="請輸入股票代碼 (例如: 2330)", label_visibility="collapsed")
-st.divider()
 
-# 收款區域
+# 2. 收款鎖定塊 (去邊框版)
 target_code = code.strip() if code else "未指定"
-st.markdown(f'<div class="lock-box-no-border">⚠️ 權限鎖定：開牌【 {target_code} 】最新數據包</div>', unsafe_allow_html=True)
-st.markdown("<p style='text-align:center; font-size:0.8rem;'>💸 長按二維碼轉帳 (NT$ 99 / 檔)</p>", unsafe_allow_html=True)
+st.markdown(f'<div class="lock-box-flat">⚠️ 權限鎖定：開牌【 {target_code} 】最新數據包</div>', unsafe_allow_html=True)
+st.markdown("<p class='pay-instr'>💸 長按二維碼轉帳 (NT$ 99 / 檔)</p>", unsafe_allow_html=True)
 
-# 🚨 QR Code 壓縮至極小 (120px)
+# 3. QR Code 極小化與居中
 qrs = list(Path('.').rglob('*.png')) + list(Path('.').rglob('*.jpg'))
 if qrs:
-    c1, c2, c3 = st.columns([1, 1.2, 1])
-    with c2: st.image(str(qrs[-1]), width=120)
+    c1, c2, c3 = st.columns([1, 0.8, 1]) # 調窄中間列，讓圖更小
+    with c2: st.image(str(qrs[-1]), width=100) # 寬度鎖死 100 像素
 
-st.divider()
-
+# 4. 驗證開牌按鈕
 if 'stage' not in st.session_state: st.session_state.stage = "payment"
 click_verify = st.button("🔥 完成支付，驗證開牌")
 
+# 5. 原地解鎖數據
 if click_verify or st.session_state.stage == "unlocked":
     if not code.strip():
         st.warning("⚠️ 請先輸入代碼。")
@@ -101,11 +104,10 @@ if click_verify or st.session_state.stage == "unlocked":
         p_s, f_s, data = fetch_realmarket_light(code)
         st.divider()
         with st.container(border=True):
-            st.subheader(f"📊 {code.strip()} {data['name']}")
+            st.markdown(f"📊 **{code.strip()} {data['name']} 面板**")
             st.write(f"狀態：{p_s} / {f_s}")
-            st.info(f"📡 特大單：{data['big']}")
-            st.success(f"🏆 核心主力：{data['top']}")
-            st.warning(f"👥 散戶動向：{data['retail']}")
+            st.write(f"🏆 主力：{data['top']}")
+            st.write(f"👥 散戶：{data['retail']}")
         if st.button("🔍 下一檔"):
             st.session_state.stage = "payment"
             st.rerun()
